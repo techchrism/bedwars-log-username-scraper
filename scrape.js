@@ -2,33 +2,14 @@ const fs = require('fs').promises;
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
-async function getUniquePlayers()
-{
-    const kills = JSON.parse(await fs.readFile('./data/kills.json', 'utf8'));
-    const players = [];
-    for(const kill of kills)
-    {
-        if(!players.includes(kill.killer))
-        {
-            players.push(kill.killer);
-        }
-        if(!players.includes(kill.killed))
-        {
-            players.push(kill.killed);
-        }
-    }
-    return players;
-}
-
 async function saveData(username)
 {
     const data = await (await fetch(`https://plancke.io/hypixel/player/stats/${username}`)).text();
     await fs.writeFile(`./data/pages/${username}.html`, data);
 }
 
-async function saveAllPlayers()
+async function saveAllPlayers(players)
 {
-    const players = JSON.parse(await fs.readFile('./data/players.json', 'utf8'));
     let current = 0;
     for(const player of players)
     {
@@ -55,19 +36,25 @@ async function parsePlayerData(file)
     return {name, wins, losses, bedsBroken, level};
 }
 
-async function parseAllPlayers()
+async function parseAllPlayers(players)
 {
-    const files = await fs.readdir('./data/pages');
     const stats = [];
-    for(const file of files)
+    for(const player of players)
     {
-        stats.push(await parsePlayerData(`./data/pages/${file}`));
+        stats.push(await parsePlayerData(`./data/pages/${player}.html`));
     }
     return stats;
 }
 
 (async () =>
 {
-    const stats = await parseAllPlayers();
+    const players = JSON.parse(await fs.readFile('./data/players.json', 'utf8'));
+    
+    console.log('Getting all players...');
+    await saveAllPlayers(players);
+    
+    console.log('Parsing data...');
+    const stats = await parseAllPlayers(players);
     await fs.writeFile('./data/stats.json', JSON.stringify(stats, null, 4));
+    console.log('Done!');
 })();

@@ -9,7 +9,7 @@ const fs = require('fs').promises;
     let bedsBroken = 0;
     let level = 0;
     
-    let highestLevel = 0;
+    let highestPlayer = {level: 0};
     
     for(const player of stats)
     {
@@ -18,9 +18,9 @@ const fs = require('fs').promises;
         bedsBroken += player.bedsBroken;
         level += player.level;
         
-        if(player.level > highestLevel)
+        if(player.level > highestPlayer.level)
         {
-            highestLevel = player.level;
+            highestPlayer = player;
         }
     }
     
@@ -28,5 +28,5 @@ const fs = require('fs').promises;
     console.log(`Losses: ${(losses / stats.length).toFixed(2)}`);
     console.log(`Beds broken: ${(bedsBroken / stats.length).toFixed(2)}`);
     console.log(`Level: ${(level / stats.length).toFixed(2)}`);
-    console.log(`Highest Level: ${highestLevel}`);
+    console.log(`Highest Player: ${highestPlayer.name} - ${highestPlayer.level}`);
 })();
